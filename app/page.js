@@ -11,7 +11,7 @@ export default function Home() {
 
     useEffect(() => {
         const image = new Image();
-        image.src = '/card3.jpeg';
+        image.src = '/card4.png';
 
         image.onload = () => {
             const canvas = canvasRef.current;
@@ -38,7 +38,7 @@ export default function Home() {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const image = new Image();
-        image.src = '/card3.jpeg';
+        image.src = '/card4.png';
 
         image.onload = () => {
             // Clear the canvas
@@ -50,14 +50,14 @@ export default function Home() {
             ctx.drawImage(image, offsetX, offsetY, image.width, image.height);
 
             // Add text
-            ctx.font = '27px Arial';
+            ctx.font = '38px Arial';
             ctx.fillStyle = '#133378';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
             const sanitizedName = name;
             const textX = canvas.width / 2.15;
-            const textY = canvas.height / 2.1;
+            const textY = canvas.height / 2.8;
             ctx.fillText(sanitizedName, textX, textY);
 
             // Generate the image URL
@@ -107,7 +107,7 @@ export default function Home() {
 
             <div className="py-10 flex flex-col items-center w-full max-w-5xl">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-center text-black">
-                    Dr Wasswas weds Dr Betty Party Card Generator
+                    Miss Aisha Intro & Giveaway Party Card Generator
                 </h2>
                 <p className="mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 text-center">
                     Enter a name and see the generated card on the right.
