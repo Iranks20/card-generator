@@ -50,7 +50,7 @@ export default function Home() {
             ctx.drawImage(image, offsetX, offsetY, image.width, image.height);
 
             // Add text
-            ctx.font = '38px Arial';
+            ctx.font = '44px Arial';
             ctx.fillStyle = '#133378';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
