@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "_paused_dependencies": {
+    "_note": "Re-merge into dependencies when canvas installs (VS Build Tools / working prebuilds).",
+    "canvas": "^2.11.2"
+  },
   "dependencies": {
     "axios": "^1.7.3",
-    "canvas": "^2.11.2",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18"

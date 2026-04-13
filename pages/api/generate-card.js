@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, registerFont } from 'canvas';
+// import { createCanvas, loadImage, registerFont } from 'canvas';
 import path from 'path';
 import fs from 'fs';
 
@@ -23,6 +23,7 @@ export default async function handler(req, res) {
         }
 
         try {
+            /*
             console.log('Loading card image...');
             const cardImage = await loadImage(cardImagePath);
 
@@ -54,6 +55,11 @@ export default async function handler(req, res) {
             console.log('Sending response with generated image...');
             res.setHeader('Content-Type', 'image/jpeg');
             res.send(buffer);
+            */
+            return res.status(503).json({
+                error:
+                    'Card generation is paused: native `canvas` dependency is commented out so installs work without node-gyp.',
+            });
         } catch (error) {
             console.error('Error generating card:', error);
             res.status(500).json({ error: 'Error generating card' });
