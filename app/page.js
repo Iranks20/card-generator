@@ -2,43 +2,31 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-const CARD_ASSETS = {
-    gold: "/card_gold.png",
-    black: "/card_black.png",
-};
+const CARD_ASSET = "/nyama.jpeg";
 
-/** Layout ratios tuned for 2481×3508 wedding templates (gold & black share dimensions). */
+/** Layout ratios tuned for `public/nyama.jpeg` (1080×1326, portrait). */
 const LAYOUT = {
-    nameYRatio: 0.387,
-    admitsYRatio: 0.936,
-    /** Horizontal nudge for the admit count (fraction of card width, added to center). */
-    admitsXOffsetRatio: 0.056,
-    nameFontRatio: 0.033,
-    admitsFontRatio: 0.031,
-    textMaxWidthRatio: 0.86,
-};
-
-/** Accent blue for both guest name and admit count (per card variant). */
-const TEXT_THEME = {
-    gold: { accent: "#0b6ecf" },
-    black: { accent: "#0a7ae0" },
+    /** Centered on the dotted line in the white header box. */
+    nameXRatio: 0.5,
+    nameYRatio: 0.232,
+    nameFontRatio: 0.038,
+    textMaxWidthRatio: 0.88,
 };
 
 const SANS_STACK = "'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
-const SERIF_STACK = "Georgia, 'Times New Roman', serif";
 
-function drawCardOverlay(ctx, image, guestName, admitCount, variant) {
+/** Festival purple — matches the Kisoro Nyama branding and reads clearly on the white name box. */
+const GUEST_NAME_COLOR = "#5c1f7a";
+
+function drawCardOverlay(ctx, image, guestName) {
     const w = image.naturalWidth;
     const h = image.naturalHeight;
-    const theme = TEXT_THEME[variant] || TEXT_THEME.gold;
     const maxW = w * LAYOUT.textMaxWidthRatio;
 
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(image, 0, 0);
 
     const sanitizedName = guestName.replace(/&/g, "and").trim();
-    const n = Math.min(99, Math.max(1, parseInt(String(admitCount), 10) || 1));
-    const admitsText = String(n);
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -52,33 +40,19 @@ function drawCardOverlay(ctx, image, guestName, admitCount, variant) {
         nameSize -= 1;
         setNameFont(nameSize);
     }
-    ctx.fillStyle = theme.accent;
-    ctx.fillText(sanitizedName, w / 2, h * LAYOUT.nameYRatio);
-
-    let admitSize = Math.round(w * LAYOUT.admitsFontRatio);
-    const setAdmitFont = (size) => {
-        ctx.font = `italic bold ${size}px ${SERIF_STACK}`;
-    };
-    setAdmitFont(admitSize);
-    while (admitSize > 12 && ctx.measureText(admitsText).width > maxW) {
-        admitSize -= 1;
-        setAdmitFont(admitSize);
-    }
-    const admitX = w / 2 + w * LAYOUT.admitsXOffsetRatio;
-    ctx.fillText(admitsText, admitX, h * LAYOUT.admitsYRatio);
+    ctx.fillStyle = GUEST_NAME_COLOR;
+    ctx.fillText(sanitizedName, w * LAYOUT.nameXRatio, h * LAYOUT.nameYRatio);
 }
 
 export default function Home() {
     const [guestName, setGuestName] = useState("");
-    const [admitCount, setAdmitCount] = useState(1);
-    const [cardVariant, setCardVariant] = useState("gold");
     const [loading, setLoading] = useState(false);
     const canvasRef = useRef(null);
     const baseImageRef = useRef(null);
     const [imageURL, setImageURL] = useState(null);
     const [previewReady, setPreviewReady] = useState(false);
 
-    const cardSrc = CARD_ASSETS[cardVariant];
+    const cardSrc = CARD_ASSET;
 
     useEffect(() => {
         setPreviewReady(false);
@@ -115,15 +89,11 @@ export default function Home() {
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
         const ctx = canvas.getContext("2d");
-        drawCardOverlay(ctx, img, guestName, admitCount, cardVariant);
+        drawCardOverlay(ctx, img, guestName);
 
         const dataURL = canvas.toDataURL("image/jpeg", 0.92);
         setImageURL(dataURL);
         localStorage.setItem("generatedCard", dataURL);
-        localStorage.setItem(
-            "generatedCardMeta",
-            JSON.stringify({ variant: cardVariant, guestName, admitCount: String(admitCount) }),
-        );
         setLoading(false);
     };
 
@@ -131,7 +101,7 @@ export default function Home() {
         const safe = guestName.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_") || "guest";
         const link = document.createElement("a");
         link.href = imageURL;
-        link.download = `${safe}_${cardVariant}_admit-${admitCount}.jpeg`;
+        link.download = `${safe}.jpeg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -145,7 +115,7 @@ export default function Home() {
                 .then((res) => res.blob())
                 .then((blob) => {
                     const safe = guestName.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_") || "guest";
-                    const file = new File([blob], `${safe}_${cardVariant}.jpeg`, { type: blob.type });
+                    const file = new File([blob], `${safe}.jpeg`, { type: blob.type });
                     navigator.share({ files: [file] }).catch((err) => console.error("Error sharing:", err));
                 });
         } else {
@@ -166,85 +136,27 @@ export default function Home() {
 
             <div className="py-10 flex flex-col items-center w-full max-w-5xl px-4">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-center text-black">
-                    Wedding invitation card generator
+                    Kisoro Nyama Festival invitation
                 </h2>
                 <p className="mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 text-center">
-                    Choose gold or black artwork, enter the guest name and how many people the invitation admits, then
-                    generate.
+                    Enter the guest name to generate the festival invitation card.
                 </p>
                 <div className="flex flex-wrap justify-center gap-10 w-full">
                     <div className="bg-white shadow-md rounded-lg p-5 w-full md:w-1/2 flex flex-col items-center">
                         <h2 className="text-2xl font-semibold mb-3">Generate your card</h2>
                         <form onSubmit={handleSubmit} className="w-full space-y-4">
                             <div>
-                                <span className="block text-sm font-medium text-gray-700 mb-2">Card style</span>
-                                <div className="flex gap-3">
-                                    <label
-                                        className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition ${
-                                            cardVariant === "gold"
-                                                ? "border-amber-600 bg-amber-50"
-                                                : "border-gray-200 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="cardVariant"
-                                            value="gold"
-                                            checked={cardVariant === "gold"}
-                                            onChange={() => setCardVariant("gold")}
-                                            className="sr-only"
-                                        />
-                                        <span className="font-medium text-amber-900">Gold</span>
-                                    </label>
-                                    <label
-                                        className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition ${
-                                            cardVariant === "black"
-                                                ? "border-gray-800 bg-gray-100"
-                                                : "border-gray-200 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="cardVariant"
-                                            value="black"
-                                            checked={cardVariant === "black"}
-                                            onChange={() => setCardVariant("black")}
-                                            className="sr-only"
-                                        />
-                                        <span className="font-medium text-gray-900">Black</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
                                 <label htmlFor="guestName" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Name of the person to invite
+                                    Name (invitee)
                                 </label>
                                 <input
                                     id="guestName"
                                     type="text"
                                     value={guestName}
                                     onChange={(e) => setGuestName(e.target.value)}
-                                    placeholder="e.g. Mr. John Mukasa"
+                                    placeholder="e.g. Moses Magezi"
                                     required
                                     className="w-full p-3 border border-gray-300 rounded text-black bg-white placeholder-gray-500"
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="admitCount" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Number of persons this invitation admits
-                                </label>
-                                <input
-                                    id="admitCount"
-                                    type="number"
-                                    min={1}
-                                    max={99}
-                                    value={admitCount}
-                                    onChange={(e) => {
-                                        const v = e.target.value;
-                                        setAdmitCount(v === "" ? "" : Number(v));
-                                    }}
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded text-black bg-white"
                                 />
                             </div>
                             <button
